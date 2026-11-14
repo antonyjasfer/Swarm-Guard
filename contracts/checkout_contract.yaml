@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: E-Commerce Checkout API
+  version: 1.0.0
+  description: Production checkout service contract guarded by SwarmGuard
+paths:
+  /api/v1/checkout:
+    post:
+      summary: Process order checkout
+      operationId: processCheckout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+                - total_amount
+                - currency
+                - customer_id
+              properties:
+                items:
+                  type: array
+                  description: List of items purchased
+                  items:
+                    type: object
+                    required:
+                      - product_id
+                      - quantity
+                      - unit_price
+                    properties:
+                      product_id:
+                        type: string
+                        description: Unique product SKU
+                      quantity:
+                        type: integer
+                        description: Quantity ordered
+                        minimum: 1
+                      unit_price:
+                        type: number
+                        format: float
+                        description: Unit price per item
+                total_amount:
+                  type: number
+                  format: float
+                  description: Total order amount in major currency units (e.g. 99.50)
+                currency:
+                  type: string
+                  description: Three-letter ISO currency code
+                  example: USD
+                customer_id:
+                  type: string
+                  description: Unique customer identifier
+                  example: cust_99482
+      responses:
+        '200':
+          description: Order processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - order_id
+                  - status
+                  - receipt_hash
+                properties:
+                  order_id:
+                    type: string
+                    description: Unique transaction order identifier
+                  status:
+                    type: string
+                    description: Processing status
+                    example: CONFIRMED
+                  receipt_hash:
+                    type: string
+                    description: Cryptographic receipt verification hash
+        '400':
+          description: Invalid checkout payload or contract violation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  code:
+                    type: string
