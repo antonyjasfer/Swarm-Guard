@@ -10,17 +10,13 @@ import {
   CheckCircle2,
   FileText,
   ChevronRight,
-  Eye,
   FileCode,
   Copy,
   Check,
-  Sparkles,
   Bot,
   UserCheck,
   Activity,
-  Layers,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Block, VerificationResult } from '../types';
 
@@ -55,14 +51,14 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
 
   const handleTamperClick = async (index: number) => {
     toast.error(`Simulating tamper attack on Block #${index}...`, {
-      description: 'Injecting modified payload without updating chained SHA-256 micro-hash.',
+      description: 'Modified payload without updating chained SHA-256 hash.',
     });
     await onTamperBlock(index);
   };
 
   const handleRestoreClick = async () => {
     toast.success('Restoring clean audit ledger...', {
-      description: 'Re-verifying all SHA-256 chained hashes and Argon2id milestone seals.',
+      description: 'Re-verifying all SHA-256 chained hashes and Argon2id milestone proofs.',
     });
     await onRestoreAndVerify();
   };
@@ -79,7 +75,7 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
       return 'Gemini 2.5 Backwards-Compatibility Fix Applied';
     }
     if (act.includes('OVERRIDE')) {
-      return 'Executive Override Approved & Cryptographically Sealed';
+      return 'Executive Override Approved & Sealed';
     }
     if (act.includes('ROLLBACK')) {
       return 'Rollback Directive Executed';
@@ -114,7 +110,7 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
     }
     if (workerId.includes('frontend')) {
       return {
-        label: 'Frontend Engineer',
+        label: 'Frontend Consumer',
         icon: <Bot className="w-3.5 h-3.5 text-sky-500" />,
         bg: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20',
       };
@@ -134,40 +130,40 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/75 backdrop-blur-xl shadow-sm p-5 space-y-5">
+    <div className="rounded-xl border border-slate-200 dark:border-[#1f2937] bg-white dark:bg-[#111827] p-6 shadow-sm space-y-5">
       {/* Flight Recorder Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-[#1f2937]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20">
-            <Database className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20 shrink-0">
+            <Database className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 font-sans">
                 Cryptographic Audit Ledger & Flight Recorder
               </h2>
-              <span className="text-[11px] font-sans px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-medium">
+              <span className="text-[11px] font-sans px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-medium whitespace-nowrap">
                 {blocks.length} Blocks Verified
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Append-only immutable event timeline · SHA-256 micro-hashing · Argon2id memory-hard milestone proofs
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-sans mt-0.5">
+              Append-only immutable event timeline · SHA-256 micro-hashing · Argon2id milestone proofs
             </p>
           </div>
         </div>
 
         {/* View Mode Toggle & Status Actions */}
-        <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-auto">
+        <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-auto whitespace-nowrap">
           {/* Segmented Toggle: Executive vs Cryptographic */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium">
+          <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium">
             <button
               onClick={() => {
                 setViewMode('executive');
                 toast.info('Switched to Executive Audit View');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
                 viewMode === 'executive'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm font-semibold'
+                  ? 'bg-white dark:bg-[#111827] text-slate-900 dark:text-slate-100 shadow-sm font-semibold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
@@ -179,9 +175,9 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                 setViewMode('crypto');
                 toast.info('Switched to Cryptographic Proof View');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
                 viewMode === 'crypto'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm font-semibold'
+                  ? 'bg-white dark:bg-[#111827] text-slate-900 dark:text-slate-100 shadow-sm font-semibold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
@@ -192,7 +188,7 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
 
           {/* Chain Integrity Status Badge */}
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border whitespace-nowrap ${
               isTampered
                 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
                 : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
@@ -200,13 +196,13 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
           >
             {isTampered ? (
               <>
-                <ShieldAlert className="w-4 h-4 shrink-0 animate-pulse text-rose-500" />
+                <ShieldAlert className="w-3.5 h-3.5 shrink-0 animate-pulse text-rose-500" />
                 <span>Integrity Alert: Block #{tamperedIndex}</span>
               </>
             ) : (
               <>
-                <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-500" />
-                <span>Verified / Clean (100%)</span>
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                <span>Verified / Clean</span>
               </>
             )}
           </div>
@@ -215,8 +211,8 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
           <button
             onClick={handleRestoreClick}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700 text-xs font-medium transition-colors disabled:opacity-50"
-            title="Restore pristine uncompromised blockchain and re-verify all cryptographic hashes"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-sans font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+            title="Restore uncompromised blockchain and re-verify all cryptographic hashes"
           >
             <RotateCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Restore Clean Ledger</span>
@@ -226,20 +222,19 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
 
       {/* Compromised Alert Banner */}
       {isTampered && (
-        <div className="p-4 rounded-xl bg-rose-500/10 dark:bg-rose-500/15 border-2 border-rose-500/80 text-rose-900 dark:text-rose-200 flex items-start gap-3.5">
-          <ShieldAlert className="w-6 h-6 text-rose-500 shrink-0 mt-0.5 animate-bounce" />
+        <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/40 text-rose-900 dark:text-rose-200 flex items-start gap-3">
+          <ShieldAlert className="w-5 h-5 text-rose-500 shrink-0 mt-0.5 animate-pulse" />
           <div className="space-y-1">
-            <h4 className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider font-sans">
               Cryptographic Tamper Attack Detected
             </h4>
-            <p className="text-xs text-slate-800 dark:text-slate-200">
-              Payload at <strong className="font-mono text-rose-600 dark:text-rose-400">Block #{tamperedIndex}</strong> was modified out-of-band!
-              Because SHA-256 micro-hashing mathematically binds each block to its ancestor, all subsequent blocks fail hash validation.
+            <p className="text-xs text-slate-800 dark:text-slate-200 font-sans">
+              Payload at <strong className="font-mono text-rose-600 dark:text-rose-400">Block #{tamperedIndex}</strong> was modified out-of-band. Because SHA-256 micro-hashing mathematically binds each block to its predecessor, all subsequent blocks fail integrity verification.
             </p>
             <div className="pt-1">
               <button
                 onClick={handleRestoreClick}
-                className="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium transition-colors"
+                className="px-3 py-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-xs font-sans font-medium transition-colors whitespace-nowrap"
               >
                 Restore Clean Ledger & Re-verify
               </button>
@@ -251,21 +246,38 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
       {/* VIEW MODE 1: EXECUTIVE AUDIT VIEW */}
       {viewMode === 'executive' && (
         <div className="space-y-3">
-          <div className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center justify-between px-1">
+          <div className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center justify-between px-1 font-sans">
             <span>Enterprise Compliance Event Stream</span>
             <span>Real-time Consensus Log</span>
           </div>
 
-          <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-4 pl-6 space-y-6 my-4">
+          <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-3 pl-5 space-y-4 my-2">
             {blocks.map((block) => {
               const role = getAgentRoleBadge(block.worker_id);
               const isDirectlyTampered = isTampered && tamperedIndex === block.index;
+
+              // At most one status pill:
+              let statusPill = null;
+              if (isDirectlyTampered) {
+                statusPill = (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-sans font-medium bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 whitespace-nowrap">
+                    Tamper Detected
+                  </span>
+                );
+              } else if (block.argon2_seal) {
+                statusPill = (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-sans font-medium bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 whitespace-nowrap">
+                    <Lock className="w-2.5 h-2.5" />
+                    Milestone Sealed
+                  </span>
+                );
+              }
 
               return (
                 <div key={block.index} className="relative group">
                   {/* Timeline Node Dot */}
                   <div
-                    className={`absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-2 bg-white dark:bg-slate-900 flex items-center justify-center ${
+                    className={`absolute -left-[27px] top-2 w-3.5 h-3.5 rounded-full border-2 bg-white dark:bg-[#111827] flex items-center justify-center ${
                       isDirectlyTampered
                         ? 'border-rose-500 bg-rose-500/20'
                         : block.argon2_seal
@@ -285,27 +297,19 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                   </div>
 
                   {/* Executive Card */}
-                  <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-slate-800/60">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-[#1f2937] bg-slate-50/50 dark:bg-[#0d131f] shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-[#1f2937]">
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 font-sans whitespace-nowrap">
                           {getExecutiveEventTitle(block)}
                         </span>
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-sans font-medium border ${role.bg}`}
-                        >
-                          {role.icon}
-                          {role.label} ({block.worker_id})
+                        <span className="text-[11px] font-sans text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                          · {role.label} ({block.worker_id})
                         </span>
-                        {block.argon2_seal && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-sans font-semibold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
-                            <Lock className="w-3 h-3" />
-                            Milestone Sealed
-                          </span>
-                        )}
+                        {statusPill}
                       </div>
 
-                      <div className="flex items-center gap-2 text-slate-400 text-xs font-mono">
+                      <div className="flex items-center gap-2 text-slate-400 text-xs font-mono whitespace-nowrap">
                         <span>Block #{block.index}</span>
                         <span>·</span>
                         <span>{new Date(block.timestamp).toLocaleTimeString()}</span>
@@ -316,19 +320,18 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                       {getExecutiveDescription(block)}
                     </p>
 
-                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/40">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Verified by SwarmGuard Consensus
-                        </span>
-                      </div>
+                    <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-[#1f2937]">
+                      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium font-sans whitespace-nowrap">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Verified Consensus
+                      </span>
+
                       <button
                         onClick={() => {
                           setViewMode('crypto');
                           setExpandedBlockIndex(block.index);
                         }}
-                        className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium"
+                        className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-sans font-medium whitespace-nowrap"
                       >
                         <span>View Cryptographic Proof</span>
                         <ChevronRight className="w-3 h-3" />
@@ -345,17 +348,40 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
       {/* VIEW MODE 2: CRYPTOGRAPHIC PROOF VIEW */}
       {viewMode === 'crypto' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
-            <span>Cryptographic Merkle Linkage & Key-Stretched Proofs</span>
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1 font-sans">
+            <span>Cryptographic Chaining & Key-Stretched Proofs</span>
             <span>Deterministic SHA-256 Hashes</span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {blocks.map((block, i) => {
               const isThisBlockTampered =
                 isTampered && tamperedIndex !== null && block.index >= tamperedIndex;
               const isDirectlyModified = isTampered && tamperedIndex === block.index;
               const isExpanded = expandedBlockIndex === block.index;
+
+              // At most one status pill:
+              let statusBadge = null;
+              if (isDirectlyModified) {
+                statusBadge = (
+                  <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-medium border border-rose-500/30 whitespace-nowrap">
+                    Tamper Injected Here
+                  </span>
+                );
+              } else if (isThisBlockTampered) {
+                statusBadge = (
+                  <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 whitespace-nowrap">
+                    Broken Hash Link
+                  </span>
+                );
+              } else if (block.argon2_seal) {
+                statusBadge = (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-sans font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 whitespace-nowrap">
+                    <Lock className="w-2.5 h-2.5" />
+                    Argon2id Sealed
+                  </span>
+                );
+              }
 
               return (
                 <div key={block.index} className="relative">
@@ -363,11 +389,11 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                   {i > 0 && (
                     <div className="flex items-center justify-center my-1">
                       <div
-                        className={`h-5 w-0.5 ${
-                          isThisBlockTampered ? 'bg-rose-500' : 'bg-indigo-400/50'
+                        className={`h-4 w-0.5 ${
+                          isThisBlockTampered ? 'bg-rose-500' : 'bg-indigo-400/40'
                         }`}
                       />
-                      <div className="absolute left-6 sm:left-10 text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                      <div className="absolute left-6 text-[10px] font-mono text-slate-400 flex items-center gap-1">
                         <ArrowDown className="w-3 h-3" />
                         <span>sha256(prev_hash)</span>
                       </div>
@@ -376,12 +402,12 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
 
                   {/* Block Card */}
                   <div
-                    className={`rounded-2xl border transition-all duration-200 ${
+                    className={`rounded-xl border transition-all ${
                       isDirectlyModified
-                        ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-500 shadow-md shadow-rose-500/10'
+                        ? 'bg-rose-50/20 dark:bg-rose-950/20 border-rose-500/60'
                         : isThisBlockTampered
-                        ? 'bg-slate-50 dark:bg-slate-950 border-rose-400/50'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                        ? 'bg-slate-50/50 dark:bg-[#0d131f] border-rose-400/40'
+                        : 'bg-slate-50/50 dark:bg-[#0d131f] border-slate-200 dark:border-[#1f2937] hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
                     {/* Block Header */}
@@ -389,40 +415,25 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                       <div className="flex items-start sm:items-center gap-3">
                         {/* Block Index Badge */}
                         <div
-                          className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl font-mono font-bold border shrink-0 ${
+                          className={`flex flex-col items-center justify-center w-11 h-11 rounded-lg font-mono font-bold border shrink-0 ${
                             isThisBlockTampered
                               ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                           }`}
                         >
-                          <span className="text-[10px] text-slate-500 font-normal">BLOCK</span>
-                          <span className="text-sm">#{block.index}</span>
+                          <span className="text-[9px] text-slate-500 font-normal">BLOCK</span>
+                          <span className="text-xs">#{block.index}</span>
                         </div>
 
                         <div>
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">
                               {block.worker_id}
                             </span>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                              {block.action_type}
+                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                              · {block.action_type}
                             </span>
-                            {block.argon2_seal && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
-                                <Lock className="w-3 h-3" />
-                                Argon2id Milestone Seal
-                              </span>
-                            )}
-                            {isDirectlyModified && (
-                              <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold border border-rose-500/30">
-                                Tamper Injected Here
-                              </span>
-                            )}
-                            {isThisBlockTampered && !isDirectlyModified && (
-                              <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                                Broken Hash Link
-                              </span>
-                            )}
+                            {statusBadge}
                           </div>
                           <p className="text-xs text-slate-700 dark:text-slate-300 font-sans mt-1">
                             {block.payload_preview}
@@ -431,11 +442,11 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                       </div>
 
                       {/* Action Buttons for this Block */}
-                      <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+                      <div className="flex items-center gap-2 shrink-0 self-end md:self-auto whitespace-nowrap">
                         <button
                           onClick={() => handleTamperClick(block.index)}
                           disabled={loading}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-500/10 dark:bg-slate-800 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 hover:border-rose-400 text-xs font-sans font-medium transition-colors flex items-center gap-1.5"
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 hover:border-rose-400 text-xs font-sans font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap"
                           title="Simulate malicious tampering of this block's data"
                         >
                           <Bug className="w-3.5 h-3.5 text-rose-500" />
@@ -444,7 +455,7 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
 
                         <button
                           onClick={() => setExpandedBlockIndex(isExpanded ? null : block.index)}
-                          className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs border border-slate-300 dark:border-slate-700 transition-colors"
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs border border-slate-200 dark:border-slate-700 transition-colors"
                           title="Inspect raw cryptographic JSON record"
                         >
                           <FileCode className="w-4 h-4" />
@@ -453,11 +464,11 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                     </div>
 
                     {/* Hashes Summary Strip */}
-                    <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 text-[11px] font-mono flex flex-col md:flex-row md:items-center justify-between gap-2 text-slate-500 dark:text-slate-400">
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-slate-400">BLOCK HASH:</span>
+                    <div className="px-4 py-2.5 bg-slate-100/60 dark:bg-slate-900/60 border-t border-slate-200 dark:border-[#1f2937] text-[11px] font-mono flex flex-col md:flex-row md:items-center justify-between gap-2 text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                        <span className="text-slate-400 whitespace-nowrap">BLOCK HASH:</span>
                         <span
-                          className={`font-semibold truncate ${
+                          className={`font-semibold font-mono text-[11px] truncate ${
                             isThisBlockTampered
                               ? 'text-rose-600 dark:text-rose-400 line-through'
                               : 'text-indigo-600 dark:text-indigo-400'
@@ -467,7 +478,7 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                         </span>
                         <button
                           onClick={() => handleCopyHash(block.block_hash, block.index)}
-                          className="hover:text-slate-700 dark:hover:text-slate-200"
+                          className="hover:text-slate-700 dark:hover:text-slate-200 shrink-0"
                           title="Copy hash"
                         >
                           {copiedHashIndex === block.index ? (
@@ -478,11 +489,11 @@ export const FlightRecorderView: React.FC<FlightRecorderViewProps> = ({
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span className="text-slate-400">PREV HASH:</span>
-                          <span className="text-slate-600 dark:text-slate-400 truncate">
-                            {block.prev_hash.slice(0, 16)}...
+                      <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-slate-400">PREV:</span>
+                          <span className="text-slate-600 dark:text-slate-400 font-mono">
+                            {block.prev_hash.slice(0, 12)}...
                           </span>
                         </div>
                         <span className="text-slate-400">

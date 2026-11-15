@@ -260,18 +260,17 @@ export const App: React.FC = () => {
     try {
       const restored = await api.verifyLedger();
       setVerification(restored);
-      setBlocks((prev) =>
-        prev.map((b) => ({
-          ...b,
-          tampered: false,
-          payload_preview:
-            b.index === 0
-              ? 'Locked contracts/checkout_contract.yaml (SHA-256 genesis fingerprint computed)'
-              : b.index === 1
-              ? 'Verified test assertions for E-Commerce Checkout API schema baseline'
-              : 'Renamed total_amount: float -> amount_cents: int in /api/v1/checkout endpoint',
-        }))
-      );
+      const freshBlocks = await api.fetchLedger();
+      if (freshBlocks && freshBlocks.length > 0) {
+        setBlocks(freshBlocks);
+      } else {
+        setBlocks((prev) =>
+          prev.map((b) => ({
+            ...b,
+            tampered: false,
+          }))
+        );
+      }
       toast.success('Cryptographic audit trail restored: All SHA-256 hashes and Argon2id seals verified clean');
     } finally {
       setLoading(false);
@@ -368,10 +367,36 @@ export const App: React.FC = () => {
 
   const handleApplyAiFix = async () => {
     await handleGateAction('APPLY_FIX', 'gemini-2.5-flash', 'Automated backwards compatibility patch');
+    try {
+      const res = await api.verifyLedger();
+      setVerification(res);
+      const freshBlocks = await api.fetchLedger();
+      if (freshBlocks && freshBlocks.length > 0) {
+        setBlocks(freshBlocks);
+      }
+    } catch (_) {}
+  };
+
+  const handleVerifyLedger = async () => {
+    setLoading(true);
+    try {
+      if (gateState.state === 'INTERCEPTED_BLOCK') {
+        await handleGateAction('APPLY_FIX', 'gemini-2.5-flash', 'Automated backwards compatibility patch');
+      }
+      const res = await api.verifyLedger();
+      setVerification(res);
+      const freshBlocks = await api.fetchLedger();
+      if (freshBlocks && freshBlocks.length > 0) {
+        setBlocks(freshBlocks);
+      }
+      toast.success('Audit ledger verified: All block hashes and Argon2id proofs valid');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
       {/* Toast Notification Provider */}
       <Toaster position="top-right" richColors closeButton theme={theme} />
 
@@ -385,35 +410,9 @@ export const App: React.FC = () => {
         onToggleTheme={toggleTheme}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* KPI Ribbon: 4 Polished SaaS Metrics */}
-        <KpiRibbon
-          contract={contract}
-          gateState={gateState}
-          blocks={blocks}
-          verification={verification}
-        />
-
-        {/* Section 1: Swarm Topology Graph & Drift Interceptor Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-6 flex">
-            <div className="w-full">
-              <SwarmGraph nodes={swarmNodes} gateState={gateState.state} />
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 flex">
-            <div className="w-full">
-              <DriftFeed
-                events={driftEvents}
-                onOpenGateModal={() => setPolicyModalOpen(true)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Guided 1-2-3 Stepper Tour Runner */}
+      {/* Main Container: max-w-7xl mx-auto px-6 py-8 space-y-6 */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-6">
+        {/* Top Row: Horizontal Demo Action Bar */}
         <DemoControls
           demoState={demoState}
           onRunFullDemo={handleRunFullDemo}
@@ -423,9 +422,28 @@ export const App: React.FC = () => {
           loading={loading}
           onLockContract={handleLockContract}
           onApplyFix={handleApplyAiFix}
+          onVerifyLedger={handleVerifyLedger}
         />
 
-        {/* Section 3: Cryptographic Flight Recorder Ledger & Tamper Explorer */}
+        {/* Row 2: 4 KPI Cards (3 clean lines, zero truncation) */}
+        <KpiRibbon
+          contract={contract}
+          gateState={gateState}
+          blocks={blocks}
+          verification={verification}
+        />
+
+        {/* Row 3: Agent Pipeline (4-Column Horizontal Step Grid) */}
+        <SwarmGraph nodes={swarmNodes} gateState={gateState.state} />
+
+        {/* Row 4: Drift Inspector (Full Breathable Width) */}
+        <DriftFeed
+          events={driftEvents}
+          onOpenGateModal={() => setPolicyModalOpen(true)}
+          onAutoFix={handleApplyAiFix}
+        />
+
+        {/* Row 5: Cryptographic Flight Recorder Ledger & Tamper Explorer */}
         <FlightRecorderView
           blocks={blocks}
           verification={verification}
@@ -446,7 +464,7 @@ export const App: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-200/80 dark:border-white/[0.08] bg-white/60 dark:bg-[#06070a]/90 py-5 px-6 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors duration-150">
+      <footer className="border-t border-slate-200 dark:border-[#1f2937] bg-white/60 dark:bg-[#0b0f17]/90 py-5 px-6 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors duration-150">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
           <div className="font-medium text-slate-700 dark:text-slate-300">
             SwarmGuard Enterprise — Autonomous Multi-Agent Zero-Drift Guardian
