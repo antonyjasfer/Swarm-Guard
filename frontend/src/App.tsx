@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Toaster, toast } from 'sonner';
 import { Header } from './components/Header';
+import { KpiRibbon } from './components/KpiRibbon';
 import { SwarmGraph } from './components/SwarmGraph';
 import { DriftFeed } from './components/DriftFeed';
 import { PolicyGateModal } from './components/PolicyGateModal';
@@ -21,10 +23,33 @@ import {
   DemoState,
   SwarmNode,
 } from './types';
-import { Shield, Zap, AlertTriangle, CheckCircle2, Lock, Cpu } from 'lucide-react';
 
 export const App: React.FC = () => {
-  // State
+  // Theme state: 'light' or 'dark' (defaults to dark, persisted in localStorage)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('swarmguard_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      if (document.documentElement.classList.contains('dark')) return 'dark';
+    }
+    return 'dark';
+  });
+
+  // Apply theme to document element
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('swarmguard_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  // Application Data States
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [contract, setContract] = useState<ContractInfo>(DEFAULT_CONTRACT);
   const [blocks, setBlocks] = useState<Block[]>(DEFAULT_BLOCKS);
@@ -112,6 +137,7 @@ export const App: React.FC = () => {
             n.id === '@backend' ? { ...n, status: 'drift_blocked' } : n
           )
         );
+        toast.warning('Contract drift detected on /api/v1/checkout: breaking schema mutation intercepted');
       } else if (event.type === 'GATE_STATE_CHANGE' && event.gate) {
         setGateState(event.gate);
         if (event.gate.state === 'VERIFIED_CLEAN' || event.gate.state === 'OVERRIDE_APPROVED') {
@@ -145,8 +171,10 @@ export const App: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      toast.success('Audit ledger exported successfully (Argon2id + SHA-256 chain verified)');
     } catch (e) {
       console.error('Failed to export ledger:', e);
+      toast.error('Failed to export audit ledger');
     } finally {
       setExporting(false);
     }
@@ -178,14 +206,24 @@ export const App: React.FC = () => {
 
       setBlocks((prev) => [...prev, newBlock]);
 
-      if (action === 'APPROVE_OVERRIDE' || action === 'APPLY_FIX') {
+      if (action === 'APPROVE_OVERRIDE') {
         setSwarmNodes((prev) =>
           prev.map((n) => ({
             ...n,
             status: 'clean',
-            lastAction: action === 'APPLY_FIX' ? 'Gemini fix applied (In-sync)' : 'Override granted with Argon2id seal',
+            lastAction: 'Override granted with Argon2id seal',
           }))
         );
+        toast.warning('Policy override approved: Argon2id milestone seal appended to ledger');
+      } else if (action === 'APPLY_FIX') {
+        setSwarmNodes((prev) =>
+          prev.map((n) => ({
+            ...n,
+            status: 'clean',
+            lastAction: 'Gemini 2.5 Flash fix applied (In-sync)',
+          }))
+        );
+        toast.success('Gemini 2.5 Flash remediation patch applied: Swarm synchronized');
       } else {
         setSwarmNodes((prev) =>
           prev.map((n) =>
@@ -194,6 +232,7 @@ export const App: React.FC = () => {
               : n
           )
         );
+        toast.error('Rollback enforced: Breaking worker change rejected');
       }
     } finally {
       setLoading(false);
@@ -209,6 +248,7 @@ export const App: React.FC = () => {
       setBlocks((prev) =>
         prev.map((b) => (b.index === index ? { ...b, tampered: true, payload_preview: '🚨 [TAMPERED_CONTENT_INJECTED_ATTACK]' } : b))
       );
+      toast.error(`Integrity check failed: Block #${index} tampered! SHA-256 hash mismatch detected.`);
     } finally {
       setLoading(false);
     }
@@ -220,7 +260,6 @@ export const App: React.FC = () => {
     try {
       const restored = await api.verifyLedger();
       setVerification(restored);
-      // Reset blocks payload
       setBlocks((prev) =>
         prev.map((b) => ({
           ...b,
@@ -233,6 +272,7 @@ export const App: React.FC = () => {
               : 'Renamed total_amount: float -> amount_cents: int in /api/v1/checkout endpoint',
         }))
       );
+      toast.success('Cryptographic audit trail restored: All SHA-256 hashes and Argon2id seals verified clean');
     } finally {
       setLoading(false);
     }
@@ -283,6 +323,7 @@ export const App: React.FC = () => {
       )
     );
     setPolicyModalOpen(true);
+    toast.warning('Contract drift detected on /api/v1/checkout: total_amount -> amount_cents');
   };
 
   const handleResetBaseline = async () => {
@@ -315,87 +356,44 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleLockContract = async () => {
+    setLoading(true);
+    try {
+      const res = await api.lockContract();
+      setContract(res.contract);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApplyAiFix = async () => {
+    await handleGateAction('APPLY_FIX', 'gemini-2.5-flash', 'Automated backwards compatibility patch');
+  };
+
   return (
-    <div className="min-h-screen bg-obsidian-900 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
+      {/* Toast Notification Provider */}
+      <Toaster position="top-right" richColors closeButton theme={theme} />
+
       {/* Top Header */}
       <Header
         wsConnected={wsConnected}
         contract={contract}
         onExportLedger={handleExportLedger}
         exporting={exporting}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-6">
-        {/* Tactical Status Metric Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {/* Metric 1: Flight Recorder */}
-          <div className="cyber-card p-3.5 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-mono text-slate-400 uppercase">Cryptographic Flight Recorder</div>
-              <div className="text-lg font-mono font-bold text-cyber-cyan mt-0.5 flex items-center gap-1.5">
-                <span>{blocks.length} BLOCKS</span>
-              </div>
-            </div>
-            <div className="p-2 rounded-lg bg-cyber-cyan/15 text-cyber-cyan">
-              <Lock className="w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Metric 2: Drift Interceptor */}
-          <div className="cyber-card p-3.5 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-mono text-slate-400 uppercase">Drift Interceptor</div>
-              <div className="text-lg font-mono font-bold text-cyber-crimson mt-0.5 flex items-center gap-1.5">
-                <span>{gateState.active_incident ? '1 CRITICAL' : '0 DRIFTS'}</span>
-              </div>
-            </div>
-            <div className="p-2 rounded-lg bg-cyber-crimson/15 text-cyber-crimson">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Metric 3: Smart Policy Gate */}
-          <div className="cyber-card p-3.5 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-mono text-slate-400 uppercase">Smart Policy Gate</div>
-              <div className="text-xs font-mono font-bold mt-1">
-                <span
-                  className={`px-2 py-0.5 rounded ${
-                    gateState.state === 'INTERCEPTED_BLOCK'
-                      ? 'badge-crimson animate-pulse'
-                      : 'badge-verified'
-                  }`}
-                >
-                  {gateState.state}
-                </span>
-              </div>
-            </div>
-            <div
-              className={`p-2 rounded-lg ${
-                gateState.state === 'INTERCEPTED_BLOCK'
-                  ? 'bg-cyber-crimson/15 text-cyber-crimson'
-                  : 'bg-cyber-emerald/15 text-cyber-emerald'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Metric 4: AI Analysis Engine */}
-          <div className="cyber-card p-3.5 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-mono text-slate-400 uppercase">Gemini 2.5 Engine</div>
-              <div className="text-xs font-mono font-bold text-purple-300 mt-1 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-cyber-violet animate-ping" />
-                ONLINE // READY
-              </div>
-            </div>
-            <div className="p-2 rounded-lg bg-cyber-violet/15 text-cyber-violet">
-              <Cpu className="w-4 h-4" />
-            </div>
-          </div>
-        </div>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* KPI Ribbon: 4 Polished SaaS Metrics */}
+        <KpiRibbon
+          contract={contract}
+          gateState={gateState}
+          blocks={blocks}
+          verification={verification}
+        />
 
         {/* Section 1: Swarm Topology Graph & Drift Interceptor Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -415,7 +413,7 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 2: 1-Click Hackathon Demo Runner Controls */}
+        {/* Section 2: Guided 1-2-3 Stepper Tour Runner */}
         <DemoControls
           demoState={demoState}
           onRunFullDemo={handleRunFullDemo}
@@ -423,6 +421,8 @@ export const App: React.FC = () => {
           onSimulateDrift={handleSimulateDrift}
           onResetBaseline={handleResetBaseline}
           loading={loading}
+          onLockContract={handleLockContract}
+          onApplyFix={handleApplyAiFix}
         />
 
         {/* Section 3: Cryptographic Flight Recorder Ledger & Tamper Explorer */}
@@ -446,13 +446,13 @@ export const App: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="border-t border-obsidian-700 bg-obsidian-950 py-4 px-6 text-center text-xs font-mono text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>
-            SWARMGUARD // Antigravity /swarm Zero-Drift Guardian
+      <footer className="border-t border-slate-200/80 dark:border-white/[0.08] bg-white/60 dark:bg-[#06070a]/90 py-5 px-6 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors duration-150">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
+          <div className="font-medium text-slate-700 dark:text-slate-300">
+            SwarmGuard Enterprise — Autonomous Multi-Agent Zero-Drift Guardian
           </div>
-          <div className="text-slate-400">
-            Berkeley x DeepMind Hackathon • Cloud Run Deploy Ready • SHA-256 + Argon2id
+          <div className="text-slate-400 dark:text-slate-500 font-sans">
+            Continuous Contract Verification • Cryptographic Flight Recorder • Smart Policy Gate
           </div>
         </div>
       </footer>
