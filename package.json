@@ -1,0 +1,24 @@
+{
+  "name": "swarmguard",
+  "version": "1.0.0",
+  "description": "Zero-Drift Contract Verifier, Smart Policy Gate, and Cryptographic Flight Recorder for Antigravity swarms",
+  "scripts": {
+    "dev:backend": "uvicorn swarmguard.main:app --reload --port 8080",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "pytest tests/",
+    "lint": "python -m py_compile swarmguard/*.py"
+  },
+  "keywords": [
+    "antigravity",
+    "swarm",
+    "gemini",
+    "openapi",
+    "mcp",
+    "cryptography",
+    "argon2id",
+    "sha256"
+  ],
+  "author": "Berkeley x DeepMind Hackathon Team",
+  "license": "Apache-2.0"
+}
