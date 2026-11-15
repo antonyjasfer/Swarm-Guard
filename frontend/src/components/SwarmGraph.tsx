@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Bot, Shield, AlertOctagon, CheckCircle2, Clock, MessageSquare, Activity, Zap, RefreshCw } from 'lucide-react';
 import { SwarmNode } from '../types';
+import { AnimatedBeam } from './ui/animated-beam';
 
 interface SwarmGraphProps {
   nodes: SwarmNode[];
@@ -9,6 +10,13 @@ interface SwarmGraphProps {
 
 export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
   const [selectedNode, setSelectedNode] = useState<SwarmNode | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const coordRef = useRef<HTMLDivElement>(null);
+  const backendRef = useRef<HTMLDivElement>(null);
+  const frontendRef = useRef<HTMLDivElement>(null);
+  const verifierRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const isBlocked = gateState === 'INTERCEPTED_BLOCK';
 
@@ -71,7 +79,41 @@ export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
       </div>
 
       {/* Main Interactive Topology Visualizer */}
-      <div className="relative py-6 my-2 min-h-[380px] flex items-center justify-center">
+      <div ref={containerRef} className="relative py-6 my-2 min-h-[380px] flex items-center justify-center">
+        {/* Magic UI Animated Beams */}
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={coordRef}
+          toRef={sentinelRef}
+          duration={3}
+          gradientStartColor="#06b6d4"
+          gradientStopColor="#8b5cf6"
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={sentinelRef}
+          toRef={backendRef}
+          duration={3.5}
+          gradientStartColor={isBlocked ? "#ef4444" : "#10b981"}
+          gradientStopColor={isBlocked ? "#ef4444" : "#06b6d4"}
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={sentinelRef}
+          toRef={frontendRef}
+          duration={4}
+          gradientStartColor="#06b6d4"
+          gradientStopColor="#10b981"
+        />
+        <AnimatedBeam
+          containerRef={containerRef}
+          fromRef={sentinelRef}
+          toRef={verifierRef}
+          duration={3.2}
+          gradientStartColor="#10b981"
+          gradientStopColor="#06b6d4"
+        />
+
         {/* SVG Network Vector Connection Lines */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -133,7 +175,7 @@ export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
         </svg>
 
         {/* Central Sentinel: SWARMGUARD INTERCEPTOR */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
+        <div ref={sentinelRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
           <div
             className={`relative flex items-center justify-center w-16 h-16 rounded-full border-2 transition-all ${
               isBlocked
@@ -171,6 +213,7 @@ export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
             const coord = nodes.find((n) => n.id === '@coordinator') || nodes[0];
             return (
               <div
+                ref={coordRef}
                 onClick={() => setSelectedNode(coord)}
                 className="cursor-pointer group flex flex-col items-center transform transition-transform hover:scale-105"
               >
@@ -201,6 +244,7 @@ export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
               const isNodeBlocked = backend.status === 'drift_blocked' || isBlocked;
               return (
                 <div
+                  ref={backendRef}
                   onClick={() => setSelectedNode(backend)}
                   className="cursor-pointer group flex flex-col items-start transform transition-transform hover:scale-105 max-w-[200px]"
                 >
@@ -238,6 +282,7 @@ export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
               const fe = nodes.find((n) => n.id === '@frontend') || nodes[2];
               return (
                 <div
+                  ref={frontendRef}
                   onClick={() => setSelectedNode(fe)}
                   className="cursor-pointer group flex flex-col items-end transform transition-transform hover:scale-105 max-w-[200px]"
                 >
@@ -266,6 +311,7 @@ export const SwarmGraph: React.FC<SwarmGraphProps> = ({ nodes, gateState }) => {
             const verifier = nodes.find((n) => n.id === '@verifier') || nodes[3];
             return (
               <div
+                ref={verifierRef}
                 onClick={() => setSelectedNode(verifier)}
                 className="cursor-pointer group flex flex-col items-center transform transition-transform hover:scale-105"
               >

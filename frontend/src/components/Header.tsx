@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Radio, FileCode, Download, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { ContractInfo } from '../types';
+import { ShimmerButton } from './ui/shimmer-button';
 
 interface HeaderProps {
   wsConnected: boolean;
@@ -80,15 +81,16 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </button>
 
-            {/* 1-Click Export Cryptographic Audit Ledger */}
-            <button
+            {/* 1-Click Export Cryptographic Audit Ledger with Magic UI Shimmer */}
+            <ShimmerButton
               onClick={onExportLedger}
               disabled={exporting}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-cyber-cyan/20 to-cyber-violet/20 hover:from-cyber-cyan/30 hover:to-cyber-violet/30 text-cyber-cyan hover:text-white border border-cyber-cyan/40 hover:border-cyber-cyan text-xs font-mono font-semibold transition-all shadow-glow-cyan active:scale-95 disabled:opacity-50"
+              shimmerColor="#06b6d4"
+              className="flex items-center gap-2 px-4 py-1.5 text-xs font-mono font-semibold text-cyber-cyan border-cyber-cyan/50 hover:border-cyber-cyan shadow-glow-cyan active:scale-95 disabled:opacity-50"
             >
               <Download className={`w-3.5 h-3.5 ${exporting ? 'animate-bounce' : ''}`} />
               <span>{exporting ? 'EXPORTING...' : 'EXPORT AUDIT LEDGER'}</span>
-            </button>
+            </ShimmerButton>
           </div>
         </div>
       </header>

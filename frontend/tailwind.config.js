@@ -1,9 +1,35 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: ['class'],
   theme: {
     extend: {
       colors: {
+        border: 'hsl(var(--border, 215 28% 17%))',
+        input: 'hsl(var(--input, 215 28% 17%))',
+        ring: 'hsl(var(--ring, 189 94% 43%))',
+        background: 'hsl(var(--background, 222 47% 4%))',
+        foreground: 'hsl(var(--foreground, 210 40% 98%))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary, 189 94% 43%))',
+          foreground: 'hsl(var(--primary-foreground, 222 47% 4%))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary, 217 33% 12%))',
+          foreground: 'hsl(var(--secondary-foreground, 210 40% 98%))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive, 0 84% 60%))',
+          foreground: 'hsl(var(--destructive-foreground, 210 40% 98%))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted, 217 33% 12%))',
+          foreground: 'hsl(var(--muted-foreground, 215 20% 65%))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent, 217 33% 12%))',
+          foreground: 'hsl(var(--accent-foreground, 210 40% 98%))',
+        },
         obsidian: {
           950: '#040508',
           900: '#07090e',
@@ -21,7 +47,7 @@ export default {
         },
       },
       fontFamily: {
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       boxShadow: {
@@ -35,11 +61,32 @@ export default {
         'pulse-fast': 'pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
         'scanline': 'scanline 8s linear infinite',
+        'shimmer-slide': 'shimmer-slide var(--speed) ease-in-out infinite alternate',
+        'spin-around': 'spin-around calc(var(--speed) * 2) infinite linear',
       },
       keyframes: {
         scanline: {
           '0%': { transform: 'translateY(-100%)' },
           '100%': { transform: 'translateY(1000%)' },
+        },
+        'shimmer-slide': {
+          to: {
+            transform: 'translate(calc(100cqw - 100%), 0)',
+          },
+        },
+        'spin-around': {
+          '0%': {
+            transform: 'translateZ(0) rotate(0)',
+          },
+          '15%, 35%': {
+            transform: 'translateZ(0) rotate(90deg)',
+          },
+          '65%, 85%': {
+            transform: 'translateZ(0) rotate(270deg)',
+          },
+          '100%': {
+            transform: 'translateZ(0) rotate(360deg)',
+          },
         },
       },
     },
